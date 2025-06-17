@@ -1,21 +1,27 @@
 import { Image } from 'expo-image';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Animated, Easing, StyleSheet, View } from 'react-native';
 
-const LoadingPage = () => {
-    console.log('LoadingPage rendered'); // Add debug log
-    const spinValue = new Animated.Value(0);
+const LoadingPage: React.FC = () => {
+    // Use useRef to maintain the animated value across renders
+    const spinValue = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
-        console.log('Animation started'); // Add debug log
-        Animated.loop(
+        // Create the animation
+        const spinAnimation = Animated.loop(
             Animated.timing(spinValue, {
                 toValue: 1,
                 duration: 2000,
                 easing: Easing.linear,
                 useNativeDriver: true,
             })
-        ).start();
+        );
+        
+        // Start the animation
+        spinAnimation.start();
+
+        // Cleanup on unmount
+        return () => spinAnimation.stop();
     }, []);
 
     const spin = spinValue.interpolate({
@@ -27,22 +33,13 @@ const LoadingPage = () => {
         <View style={styles.container}>
             <Animated.View style={{ transform: [{ rotate: spin }] }}>
                 <Image 
-                    source={require('../assets/images/baller.jpg')} // Fix path
+                    source={require('../assets/images/baller.jpg')}
                     style={styles.image}
                     contentFit="contain"
                 />
             </Animated.View>
         </View>
     );
-
-    // Test this replacement in the return statement
-    // return (
-    //     <View style={styles.container}>
-    //         <Animated.View style={{ transform: [{ rotate: spin }] }}>
-    //             <View style={[styles.image, { backgroundColor: 'blue' }]} />
-    //         </Animated.View>
-    //   </View>
-    // );
 };
 
 const styles = StyleSheet.create({
